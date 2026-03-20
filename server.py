@@ -83,6 +83,29 @@ async def scheduler():
             print(f"❌ Scheduler error: {e}")
 
 
+async def generate(request):
+    """Manually trigger gazette generation."""
+    secret = os.getenv("GENERATE_SECRET", "")
+    if secret and request.query.get("secret") != secret:
+        raise web.HTTPForbidden(text="Invalid secret")
+
+    print("🔄 Manual generation triggered...")
+    try:
+        proc = await asyncio.create_subprocess_exec(
+            sys.executable, "main.py", "--api", "--no-open",
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.STDOUT,
+        )
+        stdout, _ = await proc.communicate()
+        output = stdout.decode()
+        print(output)
+        if proc.returncode == 0:
+            return web.Response(text=f"✅ Gazette generiert!\n\n{output}", content_type="text/plain")
+        return web.Response(text=f"❌ Fehler (exit {proc.returncode})\n\n{output}", content_type="text/plain", status=500)
+    except Exception as e:
+        return web.Response(text=f"❌ Error: {e}", content_type="text/plain", status=500)
+
+
 async def start_scheduler(app):
     app["scheduler"] = asyncio.create_task(scheduler())
 
@@ -94,6 +117,7 @@ async def stop_scheduler(app):
 app = web.Application()
 app.router.add_get("/", index)
 app.router.add_get("/archiv", archive)
+app.router.add_get("/generate", generate)
 app.router.add_get("/{filename}", serve_file)
 app.on_startup.append(start_scheduler)
 app.on_cleanup.append(stop_scheduler)
