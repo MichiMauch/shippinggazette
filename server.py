@@ -4,7 +4,7 @@ import asyncio
 import os
 import subprocess
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from aiohttp import web
@@ -55,7 +55,7 @@ a{{color:#6366f1}}</style></head>
 async def scheduler():
     """Run gazette generation every Monday at 05:00 UTC (06:00 CET)."""
     while True:
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         # Next Monday at 05:00 UTC
         days_until_monday = (7 - now.weekday()) % 7
         if days_until_monday == 0 and now.hour >= 5:
