@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Open+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a2e;
+            color: #333;
+        }
+
+        .newspaper {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fffef5;
+            padding: 40px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.3);
+        }
+
+        /* Header */
+        .header {
+            border-bottom: 3px double #333;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+        }
+
+        .masthead {
+            font-family: 'Merriweather', serif;
+            font-size: 3em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            text-align: center;
+            font-style: italic;
+            font-size: 1em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .date-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            margin-top: 15px;
+            color: #888;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            padding: 10px 0;
+            border-top: 1px solid #ddd;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        .stat-label {
+            font-size: 0.75em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main content area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Article styles */
+        .article {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .article:last-child {
+            border-bottom: none;
+        }
+
+        .headline {
+            font-family: 'Merriweather', serif;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        .subheading {
+            font-family: 'Merriweather', serif;
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 5px;
+            margin-top: 20px;
+        }
+
+        .byline {
+            font-style: italic;
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .article-text {
+            text-align: justify;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        /* Sidebar styles */
+        .sidebar {
+            background-color: #f4f3ff;
+            padding: 20px;
+            border: 1px solid #e0dff5;
+            border-radius: 4px;
+        }
+
+        .sidebar-header {
+            font-family: 'Merriweather', serif;
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #6366f1;
+            padding-bottom: 5px;
+            color: #6366f1;
+        }
+
+        .sidebar-item {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 0.95em;
+        }
+
+        .sidebar-item:last-child {
+            border-bottom: none;
+        }
+
+        .sidebar-item strong {
+            color: #6366f1;
+        }
+
+        /* Section headers */
+        .section-header {
+            font-family: 'Merriweather', serif;
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #6366f1;
+            text-transform: uppercase;
+            color: #333;
+        }
+
+        /* Three column layout */
+        .three-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* Quote box */
+        .quote-box {
+            background-color: #f4f3ff;
+            border-left: 4px solid #6366f1;
+            padding: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            font-size: 1.1em;
+        }
+
+        .quote-attribution {
+            text-align: right;
+            margin-top: 10px;
+            font-style: normal;
+            font-weight: 600;
+            color: #6366f1;
+        }
+
+        /* Source badge */
+        .source-badge {
+            display: inline-block;
+            font-size: 0.7em;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-family: 'JetBrains Mono', monospace;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .source-github {
+            background-color: #24292e;
+            color: white;
+        }
+
+        .source-bitbucket {
+            background-color: #0052cc;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 3px double #333;
+            text-align: center;
+            font-size: 0.85em;
+            color: #888;
+        }
+
+        .footer code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .three-column, .two-column {
+                grid-template-columns: 1fr;
+            }
+            .masthead {
+                font-size: 2em;
+            }
+            .stats-bar {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="newspaper">
+        <header class="header">
+            <h1 class="masthead">{{ title }}</h1>
+            <p class="tagline">{{ tagline }}</p>
+            <div class="date-info">
+                <span>{{ week_range }}</span>
+                <span>{{ volume_info }}</span>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.total_commits }}</div>
+                    <div class="stat-label">Commits</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.total_repos }}</div>
+                    <div class="stat-label">Repos</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">+{{ stats.total_insertions }}</div>
+                    <div class="stat-label">Insertions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">-{{ stats.total_deletions }}</div>
+                    <div class="stat-label">Deletions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ stats.most_active_repo }}</div>
+                    <div class="stat-label">Top Repo</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="main-articles">
+                <article class="article">
+                    <h2 class="headline">{{ headline_title }}</h2>
+                    <div class="byline">{{ headline_byline }}</div>
+                    <p class="article-text">{{ headline_text }}</p>
+                    <div class="quote-box">
+                        {{ headline_quote }}
+                        <div class="quote-attribution">{{ headline_quote_attribution }}</div>
+                    </div>
+                </article>
+            </div>
+
+            <aside class="sidebar">
+                <h3 class="sidebar-header">Highlights der Woche</h3>
+                {% for item in sidebar_highlights %}
+                <div class="sidebar-item">
+                    <strong>{{ item.label }}:</strong> {{ item.text }}
+                </div>
+                {% endfor %}
+            </aside>
+        </div>
+
+        <section>
+            <h2 class="section-header">Projekte</h2>
+            <div class="three-column">
+                {% for article in project_articles[:3] %}
+                <article class="article">
+                    <h3 class="subheading">{{ article.title }}</h3>
+                    <p class="article-text">{{ article.text }}</p>
+                </article>
+                {% endfor %}
+            </div>
+            {% if project_articles|length > 3 %}
+            <div class="three-column" style="margin-top: 20px;">
+                {% for article in project_articles[3:6] %}
+                <article class="article">
+                    <h3 class="subheading">{{ article.title }}</h3>
+                    <p class="article-text">{{ article.text }}</p>
+                </article>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </section>
+
+        <section>
+            <h2 class="section-header">Code &amp; Learnings</h2>
+            <article class="article">
+                <h3 class="subheading">{{ code_learnings_title }}</h3>
+                <p class="article-text">{{ code_learnings_text }}</p>
+            </article>
+        </section>
+
+        <section>
+            <h2 class="section-header">Ausblick</h2>
+            <article class="article">
+                <h3 class="subheading">Nächste Woche</h3>
+                <p class="article-text">{{ looking_ahead_text }}</p>
+                <div class="quote-box">
+                    {{ looking_ahead_quote }}
+                    <div class="quote-attribution">{{ looking_ahead_quote_attribution }}</div>
+                </div>
+            </article>
+        </section>
+
+        <footer class="footer">
+            <p>{{ title }} &mdash; Automatisch generiert am {{ generated_at }}</p>
+            <p>Powered by <code>git log</code> + OpenAI &mdash; Made with vibes</p>
+        </footer>
+    </div>
+</body>
+</html>
