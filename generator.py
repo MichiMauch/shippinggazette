@@ -65,6 +65,7 @@ Regeln:
 - project_articles: 3-6 Einträge (die aktivsten/interessantesten Projekte)
 - Schreibe auf Deutsch in Schweizer Rechtschreibung (kein ß, immer ss)
 - Sei kreativ und unterhaltsam, aber basiere alles auf den echten Daten
+- Erfinde KEINE Details hinzu die nicht in den Commit-Daten stehen (keine Städtenamen, keine Kundennamen, keine konkreten Technologien die nicht erwähnt werden)
 - stats müssen auf den echten Zahlen basieren
 """
 

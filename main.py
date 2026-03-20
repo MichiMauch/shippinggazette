@@ -9,30 +9,18 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 from config import (
+    BITBUCKET_API_KEY,
+    BITBUCKET_USERNAME,
+    BITBUCKET_WORKSPACE,
     CHRONICLE_TAGLINE,
     CHRONICLE_TITLE,
     DAYS_BACK,
+    GITHUB_TOKEN,
+    GITHUB_USERNAME,
     OUTPUT_DIR,
+    USE_API,
 )
-from collector import collect_week_data, format_for_llm
 from generator import generate_chronicle
-
-
-def html_to_pdf(html_path: Path, pdf_path: Path):
-    """Convert HTML file to PDF using Playwright."""
-    from playwright.sync_api import sync_playwright
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        page.goto(f"file://{html_path.resolve()}")
-        page.pdf(
-            path=str(pdf_path),
-            format="A3",
-            print_background=True,
-            margin={"top": "10mm", "bottom": "10mm", "left": "10mm", "right": "10mm"},
-        )
-        browser.close()
 
 
 def get_week_range() -> str:
@@ -73,9 +61,9 @@ def main():
     parser.add_argument("--days", type=int, default=DAYS_BACK, help=f"Tage zurück (default: {DAYS_BACK})")
     parser.add_argument("--collect-only", action="store_true", help="Nur Daten sammeln, nicht generieren")
     parser.add_argument("--no-open", action="store_true", help="Browser nicht automatisch öffnen")
-    parser.add_argument("--pdf", action="store_true", help="Zusätzlich PDF generieren")
     parser.add_argument("--source", choices=["all", "bitbucket", "github"], default="all", help="Nur Repos von dieser Quelle (default: all)")
     parser.add_argument("--team", action="store_true", help="NETNODE Team-Edition (Bitbucket, alle Autoren)")
+    parser.add_argument("--api", action="store_true", help="API-Modus erzwingen (statt lokale Repos)")
     args = parser.parse_args()
 
     # Team mode forces bitbucket source
@@ -87,15 +75,30 @@ def main():
         import config
         config.DAYS_BACK = args.days
 
+    use_api = args.api or USE_API
+
     # Step 1: Collect git data
     source_label = {"all": "alle", "bitbucket": "Bitbucket", "github": "GitHub"}[args.source]
+    mode_label = "API" if use_api else "lokal"
     edition = "NETNODE Team-Edition" if args.team else "Persönliche Edition"
-    print(f"📡 Scanne Git-Repos ({source_label}, {edition})...")
-    summaries = collect_week_data()
+    print(f"📡 Sammle Commits ({source_label}, {mode_label}, {edition})...")
 
-    # Filter by source
-    if args.source != "all":
-        summaries = [s for s in summaries if s.source == args.source]
+    if use_api:
+        from api_collector import collect_api_data, format_for_llm
+        summaries = collect_api_data(
+            github_username=GITHUB_USERNAME,
+            github_token=GITHUB_TOKEN,
+            bitbucket_workspace=BITBUCKET_WORKSPACE,
+            bitbucket_api_key=BITBUCKET_API_KEY,
+            bitbucket_username=BITBUCKET_USERNAME,
+            source_filter=args.source,
+            team_mode=args.team,
+        )
+    else:
+        from collector import collect_week_data, format_for_llm
+        summaries = collect_week_data()
+        if args.source != "all":
+            summaries = [s for s in summaries if s.source == args.source]
 
     if not summaries:
         print(f"❌ Keine Commits in den letzten {args.days} Tagen gefunden.")
@@ -128,17 +131,9 @@ def main():
     output_file.write_text(html, encoding="utf-8")
     print(f"✅ Gespeichert: {output_file}")
 
-    # Step 5: Generate PDF
-    if args.pdf:
-        print("📄 Generiere PDF...")
-        pdf_file = OUTPUT_DIR / f"chronicle-{date_str}{suffix}.pdf"
-        html_to_pdf(output_file, pdf_file)
-        print(f"✅ PDF gespeichert: {pdf_file}")
-
-    # Step 6: Open in browser
+    # Step 5: Open in browser
     if not args.no_open:
-        open_file = (OUTPUT_DIR / f"chronicle-{date_str}{suffix}.pdf") if args.pdf else output_file
-        webbrowser.open(f"file://{open_file.resolve()}")
+        webbrowser.open(f"file://{output_file.resolve()}")
         print("🌐 Im Browser geöffnet")
 
 
