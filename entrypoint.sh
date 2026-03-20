@@ -1,5 +1,6 @@
 #!/bin/sh
 echo "=== Shipping Gazette Container Starting ==="
+mkdir -p /app/output
 
 # Generate first edition on startup if none exists
 if [ -z "$(ls /app/output/chronicle-*.html 2>/dev/null)" ]; then
