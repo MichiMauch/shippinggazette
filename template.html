@@ -233,6 +233,93 @@
             color: white;
         }
 
+        /* Archive menu */
+        .archive-menu {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 100;
+        }
+
+        .archive-toggle {
+            width: 44px;
+            height: 44px;
+            background: #6366f1;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.3);
+            transition: background 0.2s;
+        }
+
+        .archive-toggle:hover {
+            background: #4f46e5;
+        }
+
+        .archive-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: white;
+            position: relative;
+        }
+
+        .archive-toggle span::before,
+        .archive-toggle span::after {
+            content: '';
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: white;
+            position: absolute;
+        }
+
+        .archive-toggle span::before { top: -6px; }
+        .archive-toggle span::after { top: 6px; }
+
+        .archive-dropdown {
+            display: none;
+            position: absolute;
+            top: 52px;
+            right: 0;
+            background: #fffef5;
+            border: 1px solid #e0dff5;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 200px;
+            padding: 12px 0;
+        }
+
+        .archive-dropdown.open {
+            display: block;
+        }
+
+        .archive-dropdown-title {
+            font-family: 'Merriweather', serif;
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #6366f1;
+            padding: 4px 16px 8px;
+            border-bottom: 1px solid #e0dff5;
+            margin-bottom: 4px;
+        }
+
+        .archive-dropdown a {
+            display: block;
+            padding: 8px 16px;
+            color: #333;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+
+        .archive-dropdown a:hover {
+            background: #f4f3ff;
+            color: #6366f1;
+        }
+
         /* Footer */
         .footer {
             margin-top: 40px;
@@ -249,6 +336,11 @@
             padding: 2px 6px;
             border-radius: 3px;
             font-size: 0.9em;
+        }
+
+        .next-edition {
+            margin-top: 6px;
+            font-style: italic;
         }
 
         @media (max-width: 768px) {
@@ -269,6 +361,20 @@
     </style>
 </head>
 <body>
+    {% if archive_entries|length > 1 %}
+    <nav class="archive-menu">
+        <button class="archive-toggle" onclick="document.getElementById('archiveDropdown').classList.toggle('open')" aria-label="Archiv">
+            <span></span>
+        </button>
+        <div class="archive-dropdown" id="archiveDropdown">
+            <div class="archive-dropdown-title">Archiv</div>
+            {% for entry in archive_entries %}
+            <a href="/{{ entry.filename }}">{{ entry.label }}</a>
+            {% endfor %}
+        </div>
+    </nav>
+    {% endif %}
+
     <div class="newspaper">
         <header class="header">
             <h1 class="masthead">{{ title }}</h1>
@@ -368,6 +474,7 @@
 
         <footer class="footer">
             <p>{{ title }} &mdash; Automatisch generiert am {{ generated_at }}</p>
+            <p class="next-edition">Nächste Ausgabe: {{ next_edition }}</p>
             <p>Powered by <code>git log</code> + OpenAI &mdash; Made with vibes</p>
         </footer>
     </div>

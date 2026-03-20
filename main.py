@@ -38,6 +38,36 @@ def get_volume_info() -> str:
     return f"Jahrgang {year}, Ausgabe {week_num}"
 
 
+def get_next_monday() -> str:
+    """Get the next Monday date formatted."""
+    now = datetime.now()
+    days_until_monday = (7 - now.weekday()) % 7
+    if days_until_monday == 0:
+        days_until_monday = 7
+    next_monday = now + timedelta(days=days_until_monday)
+    return next_monday.strftime("%d.%m.%Y, 06:00")
+
+
+def get_archive_entries() -> list[dict]:
+    """Get list of existing gazette files for the archive menu."""
+    files = sorted(OUTPUT_DIR.glob("chronicle-*.html"), reverse=True)
+    entries = []
+    for f in files:
+        # Extract date from filename: chronicle-2026-03-20.html
+        date_part = f.stem.replace("chronicle-", "").split("-netnode")[0].split("-github")[0].split("-bitbucket")[0]
+        try:
+            dt = datetime.strptime(date_part, "%Y-%m-%d")
+            week_num = dt.isocalendar()[1]
+            year_short = dt.strftime("%y")
+            entries.append({
+                "filename": f.name,
+                "label": f"Ausgabe {week_num}/{year_short}",
+            })
+        except ValueError:
+            continue
+    return entries
+
+
 def render_html(data: dict, title_override: str = None, tagline_override: str = None) -> str:
     """Render the newspaper HTML from template and generated data."""
     template_dir = Path(__file__).parent
@@ -50,6 +80,8 @@ def render_html(data: dict, title_override: str = None, tagline_override: str = 
         "week_range": get_week_range(),
         "volume_info": get_volume_info(),
         "generated_at": datetime.now().strftime("%d.%m.%Y, %H:%M"),
+        "next_edition": get_next_monday(),
+        "archive_entries": get_archive_entries(),
         **data,
     }
 
