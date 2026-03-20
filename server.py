@@ -1,14 +1,19 @@
-"""Simple web server to serve generated gazette HTML files."""
+"""Web server + scheduler for The Shipping Gazette."""
 
+import asyncio
 import os
+import subprocess
+import sys
+from datetime import datetime, timedelta
 from pathlib import Path
+
 from aiohttp import web
 
-OUTPUT_DIR = Path("/app/output")
+OUTPUT_DIR = Path(os.getenv("GAZETTE_OUTPUT_DIR", "/app/output"))
 
 
 async def index(request):
-    """List all generated gazettes, newest first."""
+    """Redirect to latest gazette."""
     files = sorted(OUTPUT_DIR.glob("chronicle-*.html"), reverse=True)
 
     if not files:
@@ -19,9 +24,7 @@ async def index(request):
             content_type="text/html",
         )
 
-    # Redirect to latest
-    latest = files[0].name
-    raise web.HTTPFound(f"/{latest}")
+    raise web.HTTPFound(f"/{files[0].name}")
 
 
 async def serve_file(request):
@@ -36,7 +39,7 @@ async def serve_file(request):
 
 
 async def archive(request):
-    """List all editions as a simple HTML page."""
+    """List all editions."""
     files = sorted(OUTPUT_DIR.glob("chronicle-*.html"), reverse=True)
     items = "\n".join(
         f'<li><a href="/{f.name}">{f.stem}</a></li>' for f in files
@@ -49,10 +52,51 @@ a{{color:#6366f1}}</style></head>
     return web.Response(text=html, content_type="text/html")
 
 
+async def scheduler():
+    """Run gazette generation every Monday at 05:00 UTC (06:00 CET)."""
+    while True:
+        now = datetime.utcnow()
+        # Next Monday at 05:00 UTC
+        days_until_monday = (7 - now.weekday()) % 7
+        if days_until_monday == 0 and now.hour >= 5:
+            days_until_monday = 7
+        next_run = now.replace(hour=5, minute=0, second=0, microsecond=0) + timedelta(days=days_until_monday)
+        wait_seconds = (next_run - now).total_seconds()
+        print(f"⏰ Nächste Gazette: {next_run.strftime('%A %d.%m.%Y %H:%M UTC')} (in {wait_seconds/3600:.1f}h)")
+
+        await asyncio.sleep(wait_seconds)
+
+        print("⏰ Scheduled generation starting...")
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                sys.executable, "main.py", "--api", "--no-open",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.STDOUT,
+            )
+            stdout, _ = await proc.communicate()
+            print(stdout.decode())
+            if proc.returncode == 0:
+                print("✅ Scheduled generation complete")
+            else:
+                print(f"❌ Scheduled generation failed (exit {proc.returncode})")
+        except Exception as e:
+            print(f"❌ Scheduler error: {e}")
+
+
+async def start_scheduler(app):
+    app["scheduler"] = asyncio.create_task(scheduler())
+
+
+async def stop_scheduler(app):
+    app["scheduler"].cancel()
+
+
 app = web.Application()
 app.router.add_get("/", index)
 app.router.add_get("/archiv", archive)
 app.router.add_get("/{filename}", serve_file)
+app.on_startup.append(start_scheduler)
+app.on_cleanup.append(stop_scheduler)
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "8080"))

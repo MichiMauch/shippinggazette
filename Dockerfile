@@ -2,12 +2,6 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install cron - no-install-recommends for smaller image
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends cron && \
-    rm -rf /var/lib/apt/lists/* && \
-    which crontab && echo "cron installed OK"
-
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
